@@ -25,18 +25,18 @@ final class InMemoryLigature extends Ligature {
 private case class Collection(statements: List[Statement], counter: Atomic[Long])
 
 private final class InMemoryLigatureSession extends LigatureSession {
-  private val data: Atomic[Map[String, Collection]] = Atomic(Map())
+  private val data: Atomic[Map[String, Collection]] = Atomic(Map[String, Collection]())
 
   def close(): Unit = {
-    data.set(Atomic(Map()))
+    data.set(Map[String, Collection]())
   }
 
   private val startReadTx: Task[InMemoryReadTx] = {
-    new InMemoryReadTx(data)
+    Task.eval { new InMemoryReadTx(data) }
   }
 
   private def releaseReadTx(tx: InMemoryReadTx): Task[Unit] = {
-    Task.empty
+    Task.unit
   }
 
   def read(): Resource[Task, ReadTx] = {

@@ -7,4 +7,8 @@ package dev.ligature
 import dev.ligature._
 import dev.ligature.test.LigatureSuite
 
-class LigatureInMemorySuite extends LigatureSuite
+class LigatureInMemorySuite extends LigatureSuite {
+  override def createLigatureSession(): LigatureSession = {
+    ???
+  }
+}
