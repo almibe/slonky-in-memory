@@ -11,7 +11,14 @@ import monix.reactive.Observable
 import monix.execution.atomic._
 
 private final class InMemoryReadTx(private val data: Atomic[Map[NamedNode, Collection]]) extends ReadTx {
-  def allStatements(collection: NamedNode): Observable[PersistedStatement] = ???
+  def allStatements(collection: NamedNode): Observable[PersistedStatement] = {
+    val col: Option[Collection] = data.get().get(collection)
+    if (col.isDefined) {
+      Observable.fromIterable(col.get.statements)
+    } else {
+      Observable.empty
+    }
+  }
 
   def collections(): Observable[NamedNode] = Observable.fromIterable(data.get.map { v => v._1 })
 

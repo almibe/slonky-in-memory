@@ -14,29 +14,53 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
   private val isOpen = Atomic(true)
   private val workingCopy = Atomic(data.get)
 
-  def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement] = ???
+  def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement] = {
+    def addStatement(persistedStatement: PersistedStatement): Task[PersistedStatement] = Task.eval {
+      val newStatements = workingCopy.get.get(collection).get.statements.appended(persistedStatement)
+      val working: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(newStatements, workingCopy.get.get(collection).get.counter))
+      workingCopy.set(working)
+      PersistedStatement(collection, statement, persistedStatement.context)
+    }
+
+    for {
+      _              <- createCollection(collection)
+      context        <- newEntity(collection)
+      statement      <- addStatement(PersistedStatement(collection, statement, context))
+    } yield(statement)
+  }
 
   def cancel(): Unit = isOpen.set(false)
 
   def close(): Unit = {
-    if (isOpen.get) {
-      ???
-    } else {
-      ???
+    if (isOpen.get()) {
+      commit()
     }
     isOpen.set(false)
   }
 
-  def createCollection(collection: NamedNode): Task[NamedNode] = {
-    ???
-    //    Task.eval {
-    //      if (!workingCopy.get.contains(collection)) {
-    //        workingCopy.set()
-    //      }
-    //    }
+  private def commit(): Unit = {
+    data.set(workingCopy.get())
   }
 
-  def deleteCollection(collection: NamedNode): Task[NamedNode] = ???
+  def createCollection(collection: NamedNode): Task[NamedNode] = {
+    Task.eval {
+      if (!workingCopy.get().contains(collection)) {
+        val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get() + (collection -> Collection(List(), Atomic(0L)))
+        workingCopy.set(newWorkingCopy)
+      }
+      collection
+    }
+  }
+
+  def deleteCollection(collection: NamedNode): Task[NamedNode] = {
+    Task.eval {
+      if (workingCopy.get().contains(collection)) {
+        val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get() - collection
+        workingCopy.set(newWorkingCopy)
+      }
+      collection
+    }
+  }
 
   def newEntity(collection: NamedNode): Task[AnonymousNode] = ???
 }

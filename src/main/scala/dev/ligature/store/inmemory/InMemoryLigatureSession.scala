@@ -10,7 +10,7 @@ import monix.eval.Task
 import monix.reactive.Observable
 import monix.execution.atomic._
 
-private case class Collection(statements: List[Statement], counter: Atomic[Long])
+private case class Collection(statements: List[PersistedStatement], counter: Atomic[Long])
 
 private final class InMemoryLigatureSession extends LigatureSession {
   private val data: Atomic[Map[NamedNode, Collection]] = Atomic(Map[NamedNode, Collection]())
