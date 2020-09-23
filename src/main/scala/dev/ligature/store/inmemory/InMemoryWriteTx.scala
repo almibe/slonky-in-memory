@@ -17,15 +17,15 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
   def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement] = {
     def addStatement(persistedStatement: PersistedStatement): Task[PersistedStatement] = Task.eval {
       val newStatements = workingCopy.get.get(collection).get.statements.appended(persistedStatement)
-      val working: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(newStatements, workingCopy.get.get(collection).get.counter))
-      workingCopy.set(working)
+      val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(newStatements, workingCopy.get.get(collection).get.counter))
+      workingCopy.set(newWorkingCopy)
       PersistedStatement(collection, statement, persistedStatement.context)
     }
 
     for {
-      _              <- createCollection(collection)
-      context        <- newEntity(collection)
-      statement      <- addStatement(PersistedStatement(collection, statement, context))
+      _         <- createCollection(collection)
+      context   <- newNode(collection)
+      statement <- addStatement(PersistedStatement(collection, statement, context))
     } yield(statement)
   }
 
@@ -62,5 +62,17 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
     }
   }
 
-  def newEntity(collection: NamedNode): Task[AnonymousNode] = ???
+  def newNode(collection: NamedNode): Task[AnonymousNode] = {
+    def createNewNode(): Task[AnonymousNode] = Task.eval {
+      val nextId = workingCopy.get.get(collection).get.counter.get + 1
+      val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(workingCopy.get.get(collection).get.statements, Atomic(nextId)))
+      workingCopy.set(newWorkingCopy)
+      AnonymousNode(nextId)
+    }
+
+    for {
+      _    <- createCollection(collection)
+      node <- createNewNode(collection)
+    } yield(node)
+  }
 }
