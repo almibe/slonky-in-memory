@@ -72,7 +72,7 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
 
     for {
       _    <- createCollection(collection)
-      node <- createNewNode(collection)
+      node <- createNewNode()
     } yield(node)
   }
 }
