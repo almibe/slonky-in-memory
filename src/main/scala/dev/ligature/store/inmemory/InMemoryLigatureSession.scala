@@ -7,7 +7,6 @@ package dev.ligature.store.inmemory
 import dev.ligature._
 import cats.effect.Resource
 import monix.eval.Task
-import monix.reactive.Observable
 import monix.execution.atomic._
 
 private case class Collection(statements: List[PersistedStatement], counter: Atomic[Long])

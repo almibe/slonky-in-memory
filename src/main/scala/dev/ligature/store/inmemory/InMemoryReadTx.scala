@@ -5,7 +5,6 @@
 package dev.ligature.store.inmemory
 
 import dev.ligature._
-import cats.effect.Resource
 import monix.eval.Task
 import monix.reactive.Observable
 import monix.execution.atomic._
@@ -20,7 +19,7 @@ private final class InMemoryReadTx(private val data: Atomic[Map[NamedNode, Colle
     }
   }
 
-  def collections(): Observable[NamedNode] = Observable.fromIterable(data.get.map { v => v._1 })
+  def collections(): Observable[NamedNode] = Observable.fromIterable(data.get.keys)
 
   def collections(prefix: NamedNode): Observable[NamedNode] = ???
 
@@ -30,6 +29,13 @@ private final class InMemoryReadTx(private val data: Atomic[Map[NamedNode, Colle
                       subject: Option[Node],
                       predicate: Option[NamedNode],
                       `object`: Option[Object]): Observable[PersistedStatement] = ???
+
+  override def matchStatements(collection: NamedNode,
+                               subject: Option[Node],
+                               predicate: Option[NamedNode],
+                               range: Range): Observable[PersistedStatement] = {
+    ???
+  }
 
   def statementByContext(collection: NamedNode, context: AnonymousNode): Task[Option[PersistedStatement]] = ???
 }

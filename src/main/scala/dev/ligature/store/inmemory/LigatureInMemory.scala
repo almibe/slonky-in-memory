@@ -7,8 +7,6 @@ package dev.ligature.store.inmemory
 import dev.ligature._
 import cats.effect.Resource
 import monix.eval.Task
-import monix.reactive.Observable
-import monix.execution.atomic._
 
 final class InMemoryLigature extends Ligature {
   private val acquire: Task[InMemoryLigatureSession] = Task.eval { new InMemoryLigatureSession() }

@@ -26,7 +26,11 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
       _         <- createCollection(collection)
       context   <- newNode(collection)
       statement <- addStatement(PersistedStatement(collection, statement, context))
-    } yield(statement)
+    } yield statement
+  }
+
+  override def removeStatement(collection: NamedNode, statement: Statement): Task[Statement] = {
+    ???
   }
 
   def cancel(): Unit = isOpen.set(false)
@@ -73,6 +77,6 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
     for {
       _    <- createCollection(collection)
       node <- createNewNode()
-    } yield(node)
+    } yield node
   }
 }
