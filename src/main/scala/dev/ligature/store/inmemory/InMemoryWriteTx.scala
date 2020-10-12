@@ -5,9 +5,7 @@
 package dev.ligature.store.inmemory
 
 import dev.ligature._
-import cats.effect.Resource
 import monix.eval.Task
-import monix.reactive.Observable
 import monix.execution.atomic._
 
 private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Collection]]) extends WriteTx {
@@ -30,7 +28,13 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
   }
 
   override def removeStatement(collection: NamedNode, statement: Statement): Task[Statement] = {
-    ???
+    Task.eval {
+//      val newStatements = workingCopy.get.get(collection).get.statements.appended(persistedStatement)
+//      val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(newStatements, workingCopy.get.get(collection).get.counter))
+//      workingCopy.set(newWorkingCopy)
+//      PersistedStatement(collection, statement, persistedStatement.context)
+      statement
+    }
   }
 
   def cancel(): Unit = isOpen.set(false)
