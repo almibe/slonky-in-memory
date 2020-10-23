@@ -14,7 +14,7 @@ fn to_list(fut: &dyn Iterator<Item=(Vec<u8>, Vec<u8>)>) -> Vec<u8> {
 fn test_instances_should_start_empty() {
     let slonky = create_in_memory_slonky();
     let res = slonky.read::<Vec<u8>, String>(
-        Box::new(|tx: Box<dyn ReadTx>| Result::Ok(to_list(&tx.scan_all())))
+        Box::new(|tx| Result::Ok(to_list(&tx.scan_all())))
     );
     assert!(res.expect("").is_empty())
 }

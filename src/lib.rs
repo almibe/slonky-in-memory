@@ -5,30 +5,13 @@
 use slonky::Slonky;
 use slonky::ReadTx;
 use slonky::WriteTx;
+use std::collections::BTreeMap;
 
 struct InMemorySlonky {
-
+    pub data: BTreeMap<Vec<u8>, Vec<u8>>
 }
 
-struct InMemoryReadTx {
-
-}
-
-struct InMemoryWriteTx {
-
-}
-
-impl Slonky for InMemorySlonky {
-    fn read<T, E>(&self, f: Box<dyn Fn(Box<dyn ReadTx>) -> Result<T, E>  + Sync + Send>) -> Result<T, E> {
-        unimplemented!()
-    }
-
-    fn write<E>(&self, f: Box<dyn Fn(Box<dyn WriteTx>) -> Result<(), E> + Sync + Send>) -> Result<(), E> {
-        unimplemented!()
-    }
-}
-
-impl ReadTx for InMemoryReadTx {
+impl ReadTx for InMemorySlonky {
     fn key_exists(&self, key: &[u8]) -> bool {
         unimplemented!()
     }
@@ -54,7 +37,17 @@ impl ReadTx for InMemoryReadTx {
     }
 }
 
-impl WriteTx for InMemoryWriteTx {
+impl Slonky for InMemorySlonky {
+    fn read<T, E>(&self, f: Box<dyn Fn(Box<&dyn ReadTx>) -> Result<T, E>>) -> Result<T, E> {
+        f(Box::new(self))
+    }
+
+    fn write<E>(&self, f: Box<dyn Fn(Box<&dyn WriteTx>) -> Result<(), E>>) -> Result<(), E> {
+        unimplemented!()
+    }
+}
+
+impl WriteTx for InMemorySlonky {
     fn key_exists(&self, key: &[u8]) -> bool {
         unimplemented!()
     }
@@ -81,7 +74,8 @@ impl WriteTx for InMemoryWriteTx {
 }
 
 pub fn create_in_memory_slonky() -> impl Slonky {
-    InMemorySlonky {}
+    let data = BTreeMap::new();
+    InMemorySlonky { data: data }
 }
 
 #[cfg(test)]
