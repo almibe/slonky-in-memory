@@ -4,11 +4,11 @@
 
 package dev.almibe.slonky.inmemory
 
-import dev.ligature._
-import dev.ligature.test.LigatureSuite
+import dev.almibe.slonky.Slonky
+import dev.almibe.slonky.test.SlonkySuite
 
-class LigatureInMemorySuite extends LigatureSuite {
-  override def createLigatureSession(): LigatureSession = {
-    new InMemoryLigatureSession()
+class LigatureInMemorySuite extends SlonkySuite {
+  override def createSlonky(): Slonky = {
+    new InMemorySlonky()
   }
 }

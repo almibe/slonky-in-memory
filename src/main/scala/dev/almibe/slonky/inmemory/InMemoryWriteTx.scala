@@ -4,40 +4,17 @@
 
 package dev.almibe.slonky.inmemory
 
-import dev.ligature._
-import monix.eval.Task
-import monix.execution.atomic._
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 
-private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Collection]]) extends WriteTx {
-  private val isOpen = Atomic(true)
-  private val workingCopy = Atomic(data.get)
+import cats.effect.IO
+import dev.almibe.slonky.SlonkyWriteTx
+import scodec.bits.ByteVector
 
-  def addStatement(collection: NamedNode, statement: Statement): Task[PersistedStatement] = {
-    def addStatement(persistedStatement: PersistedStatement): Task[PersistedStatement] = Task.eval {
-      val newStatements = workingCopy.get.get(collection).get.statements.appended(persistedStatement)
-      val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(newStatements, workingCopy.get.get(collection).get.counter))
-      workingCopy.set(newWorkingCopy)
-      PersistedStatement(collection, statement, persistedStatement.context)
-    }
+private final class InMemoryWriteTx(private val data: AtomicReference[Map[ByteVector, ByteVector]]) extends SlonkyWriteTx {
+  private val isOpen = new AtomicBoolean(true)
+  private val workingCopy = new AtomicReference(data.get)
 
-    for {
-      _         <- createCollection(collection)
-      context   <- newNode(collection)
-      statement <- addStatement(PersistedStatement(collection, statement, context))
-    } yield statement
-  }
-
-  override def removeStatement(collection: NamedNode, statement: Statement): Task[Statement] = {
-    Task.eval {
-//      val newStatements = workingCopy.get.get(collection).get.statements.appended(persistedStatement)
-//      val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(newStatements, workingCopy.get.get(collection).get.counter))
-//      workingCopy.set(newWorkingCopy)
-//      PersistedStatement(collection, statement, persistedStatement.context)
-      statement
-    }
-  }
-
-  def cancel(): Unit = isOpen.set(false)
+  def cancel(): IO[Unit] = IO { isOpen.set(false) }
 
   def close(): Unit = {
     if (isOpen.get()) {
@@ -50,37 +27,13 @@ private final class InMemoryWriteTx(private val data: Atomic[Map[NamedNode, Coll
     data.set(workingCopy.get())
   }
 
-  def createCollection(collection: NamedNode): Task[NamedNode] = {
-    Task.eval {
-      if (!workingCopy.get().contains(collection)) {
-        val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get() + (collection -> Collection(List(), Atomic(0L)))
-        workingCopy.set(newWorkingCopy)
-      }
-      collection
-    }
-  }
+  override def keyExists(key: ByteVector): IO[Boolean] = ???
 
-  def deleteCollection(collection: NamedNode): Task[NamedNode] = {
-    Task.eval {
-      if (workingCopy.get().contains(collection)) {
-        val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get() - collection
-        workingCopy.set(newWorkingCopy)
-      }
-      collection
-    }
-  }
+  override def prefixExists(prefix: ByteVector): IO[Boolean] = ???
 
-  def newNode(collection: NamedNode): Task[AnonymousNode] = {
-    def createNewNode(): Task[AnonymousNode] = Task.eval {
-      val nextId = workingCopy.get.get(collection).get.counter.get + 1
-      val newWorkingCopy: Map[NamedNode, Collection] = workingCopy.get + (collection -> Collection(workingCopy.get.get(collection).get.statements, Atomic(nextId)))
-      workingCopy.set(newWorkingCopy)
-      AnonymousNode(nextId)
-    }
+  override def get(key: ByteVector): IO[Option[ByteVector]] = ???
 
-    for {
-      _    <- createCollection(collection)
-      node <- createNewNode()
-    } yield node
-  }
+  override def put(key: ByteVector, value: ByteVector): IO[(ByteVector, ByteVector)] = ???
+
+  override def remove(key: ByteVector): IO[(ByteVector, ByteVector)] = ???
 }

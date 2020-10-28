@@ -4,38 +4,25 @@
 
 package dev.almibe.slonky.inmemory
 
-import dev.ligature._
-import monix.eval.Task
-import monix.reactive.Observable
-import monix.execution.atomic._
+import java.util.concurrent.atomic.AtomicReference
 
-private final class InMemoryReadTx(private val data: Atomic[Map[NamedNode, Collection]]) extends ReadTx {
-  def allStatements(collection: NamedNode): Observable[PersistedStatement] = {
-    val col: Option[Collection] = data.get().get(collection)
-    if (col.isDefined) {
-      Observable.fromIterable(col.get.statements)
-    } else {
-      Observable.empty
-    }
-  }
+import cats.effect.IO
+import dev.almibe.slonky.SlonkyReadTx
+import scodec.bits.ByteVector
+import fs2.Stream
 
-  def collections(): Observable[NamedNode] = Observable.fromIterable(data.get.keys)
+private final class InMemoryReadTx(private val data: AtomicReference[Map[ByteVector, ByteVector]]) extends SlonkyReadTx {
+  override def keyExists(key: ByteVector): IO[Boolean] = ???
 
-  def collections(prefix: NamedNode): Observable[NamedNode] = ???
+  override def prefixExists(prefix: ByteVector): IO[Boolean] = ???
 
-  def collections(from: NamedNode, to: NamedNode): Observable[NamedNode] = ???
+  override def get(key: ByteVector): IO[Option[ByteVector]] = ???
 
-  def matchStatements(collection: NamedNode,
-                      subject: Option[Node],
-                      predicate: Option[NamedNode],
-                      `object`: Option[Object]): Observable[PersistedStatement] = ???
+  override def prefixScan(prefix: ByteVector): Stream[IO, (ByteVector, ByteVector)] = ???
 
-  override def matchStatements(collection: NamedNode,
-                               subject: Option[Node],
-                               predicate: Option[NamedNode],
-                               range: Range): Observable[PersistedStatement] = {
-    ???
-  }
+  override def rangeScan(from: ByteVector, to: ByteVector): Stream[IO, (ByteVector, ByteVector)] = ???
 
-  def statementByContext(collection: NamedNode, context: AnonymousNode): Task[Option[PersistedStatement]] = ???
+  override def scanAll(): Stream[IO, (ByteVector, ByteVector)] = ???
+
+  def cancel(): IO[Unit] = IO.unit
 }
