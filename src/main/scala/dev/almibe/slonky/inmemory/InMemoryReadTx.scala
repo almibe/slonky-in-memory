@@ -34,7 +34,9 @@ private final class InMemoryReadTx(private val data: SortedMap[ByteVector, ByteV
     }
   }
 
-  override def rangeScan(from: ByteVector, to: ByteVector): Stream[IO, (ByteVector, ByteVector)] = ???
+  override def rangeScan(from: ByteVector, to: ByteVector): Stream[IO, (ByteVector, ByteVector)] = {
+    Stream.fromIterator[IO](data.range(from, to).iterator)
+  }
 
   override def scanAll(): Stream[IO, (ByteVector, ByteVector)] = Stream.fromIterator[IO](data.iterator)
 
