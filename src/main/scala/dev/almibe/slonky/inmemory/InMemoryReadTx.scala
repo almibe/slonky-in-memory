@@ -12,18 +12,11 @@ import fs2.Stream
 import scala.collection.immutable.SortedMap
 
 private final class InMemoryReadTx(private val data: SortedMap[ByteVector, ByteVector]) extends SlonkyReadTx {
-  override def keyExists(key: ByteVector): IO[Boolean] = ???
+  override def keyExists(key: ByteVector): IO[Boolean] = SharedLookup.keyExists(data, key)
 
-  override def prefixExists(prefix: ByteVector): IO[Boolean] = IO {
-    val range = data.rangeFrom(prefix)
-    if (range.isEmpty) {
-      false
-    } else {
-      range.firstKey.startsWith(prefix)
-    }
-  }
+  override def prefixExists(prefix: ByteVector): IO[Boolean] = SharedLookup.prefixExists(data, prefix)
 
-  override def get(key: ByteVector): IO[Option[ByteVector]] = ???
+  override def get(key: ByteVector): IO[Option[ByteVector]] = SharedLookup.get(data, key)
 
   override def prefixScan(prefix: ByteVector): Stream[IO, (ByteVector, ByteVector)] = {
     val range = data.rangeFrom(prefix)

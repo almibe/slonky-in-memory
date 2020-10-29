@@ -4,6 +4,26 @@
 
 package dev.almibe.slonky.inmemory
 
-object SharedLookup {
+import cats.effect.IO
+import scodec.bits.ByteVector
 
+import scala.collection.SortedMap
+
+object SharedLookup {
+  def keyExists(data: SortedMap[ByteVector, ByteVector], key: ByteVector): IO[Boolean] = {
+    ???
+  }
+
+  def prefixExists(data: SortedMap[ByteVector, ByteVector], prefix: ByteVector): IO[Boolean] = IO {
+    val range = data.rangeFrom(prefix)
+    if (range.isEmpty) {
+      false
+    } else {
+      range.firstKey.startsWith(prefix)
+    }
+  }
+
+  def get(data: SortedMap[ByteVector, ByteVector], key: ByteVector): IO[Option[ByteVector]] = {
+    ???
+  }
 }

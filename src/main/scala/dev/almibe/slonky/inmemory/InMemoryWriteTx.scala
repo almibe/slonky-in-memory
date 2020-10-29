@@ -29,11 +29,11 @@ private final class InMemoryWriteTx(private val data: AtomicReference[SortedMap[
     data.set(workingCopy.get())
   }
 
-  override def keyExists(key: ByteVector): IO[Boolean] = ???
+  override def keyExists(key: ByteVector): IO[Boolean] = SharedLookup.keyExists(workingCopy.get(), key)
 
-  override def prefixExists(prefix: ByteVector): IO[Boolean] = ???
+  override def prefixExists(prefix: ByteVector): IO[Boolean] = SharedLookup.prefixExists(workingCopy.get(), prefix)
 
-  override def get(key: ByteVector): IO[Option[ByteVector]] = ???
+  override def get(key: ByteVector): IO[Option[ByteVector]] = SharedLookup.get(workingCopy.get(), key)
 
   override def put(key: ByteVector, value: ByteVector): IO[Unit] = IO {
       val newWorkingCopy = workingCopy.get() + (key -> value)
