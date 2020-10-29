@@ -4,17 +4,19 @@
 
 package dev.almibe.slonky.inmemory
 
-import java.util.concurrent.atomic.AtomicReference
-
 import cats.effect.IO
 import dev.almibe.slonky.SlonkyReadTx
 import scodec.bits.ByteVector
 import fs2.Stream
 
-private final class InMemoryReadTx(private val data: AtomicReference[Map[ByteVector, ByteVector]]) extends SlonkyReadTx {
+import scala.collection.immutable.SortedMap
+
+private final class InMemoryReadTx(private val data: SortedMap[ByteVector, ByteVector]) extends SlonkyReadTx {
   override def keyExists(key: ByteVector): IO[Boolean] = ???
 
-  override def prefixExists(prefix: ByteVector): IO[Boolean] = ???
+  override def prefixExists(prefix: ByteVector): IO[Boolean] = IO {
+    ???
+  }
 
   override def get(key: ByteVector): IO[Option[ByteVector]] = ???
 
@@ -22,7 +24,7 @@ private final class InMemoryReadTx(private val data: AtomicReference[Map[ByteVec
 
   override def rangeScan(from: ByteVector, to: ByteVector): Stream[IO, (ByteVector, ByteVector)] = ???
 
-  override def scanAll(): Stream[IO, (ByteVector, ByteVector)] = ???
+  override def scanAll(): Stream[IO, (ByteVector, ByteVector)] = Stream.fromIterator[IO](data.iterator)
 
   def cancel(): IO[Unit] = IO.unit
 }

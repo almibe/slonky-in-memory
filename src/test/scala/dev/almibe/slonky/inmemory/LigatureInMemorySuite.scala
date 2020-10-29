@@ -8,7 +8,7 @@ import dev.almibe.slonky.Slonky
 import dev.almibe.slonky.test.SlonkySuite
 
 class LigatureInMemorySuite extends SlonkySuite {
-  override def createSlonky(): Slonky = {
+  override def createSlonky: Slonky = {
     new InMemorySlonky()
   }
 }

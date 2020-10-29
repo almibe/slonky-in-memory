@@ -10,7 +10,9 @@ import cats.effect.IO
 import dev.almibe.slonky.SlonkyWriteTx
 import scodec.bits.ByteVector
 
-private final class InMemoryWriteTx(private val data: AtomicReference[Map[ByteVector, ByteVector]]) extends SlonkyWriteTx {
+import scala.collection.immutable.SortedMap
+
+private final class InMemoryWriteTx(private val data: AtomicReference[SortedMap[ByteVector, ByteVector]]) extends SlonkyWriteTx {
   private val isOpen = new AtomicBoolean(true)
   private val workingCopy = new AtomicReference(data.get)
 
@@ -33,7 +35,13 @@ private final class InMemoryWriteTx(private val data: AtomicReference[Map[ByteVe
 
   override def get(key: ByteVector): IO[Option[ByteVector]] = ???
 
-  override def put(key: ByteVector, value: ByteVector): IO[(ByteVector, ByteVector)] = ???
+  override def put(key: ByteVector, value: ByteVector): IO[Unit] = IO {
+      val newWorkingCopy = workingCopy.get() + (key -> value)
+      workingCopy.set(newWorkingCopy)
+    }
 
-  override def remove(key: ByteVector): IO[(ByteVector, ByteVector)] = ???
+  override def remove(key: ByteVector): IO[Unit] = IO {
+    val newWorkingCopy = workingCopy.get().removed(key)
+    workingCopy.set(newWorkingCopy)
+  }
 }

@@ -7,18 +7,20 @@ package dev.almibe.slonky.inmemory
 import java.util.concurrent.atomic.AtomicReference
 
 import cats.effect.{IO, Resource}
-import dev.almibe.slonky.{SlonkyReadTx, SlonkyInstance, SlonkyWriteTx}
+import dev.almibe.slonky.{SlonkyInstance, SlonkyReadTx, SlonkyWriteTx}
 import scodec.bits.ByteVector
 
+import scala.collection.immutable.{SortedMap, TreeMap}
+
 private final class InMemorySlonkyInstance extends SlonkyInstance {
-  private val data: AtomicReference[Map[ByteVector, ByteVector]] = new AtomicReference(Map[ByteVector, ByteVector]())
+  private val data: AtomicReference[SortedMap[ByteVector, ByteVector]] = new AtomicReference(TreeMap[ByteVector, ByteVector]())
 
   def close(): Unit = {
-    data.set(Map[ByteVector, ByteVector]())
+    data.set(SortedMap[ByteVector, ByteVector]())
   }
 
   private val startReadTx: IO[InMemoryReadTx] = {
-    IO { new InMemoryReadTx(data) }
+    IO { new InMemoryReadTx(data.get()) }
   }
 
   private def releaseReadTx(tx: InMemoryReadTx): IO[Unit] = {

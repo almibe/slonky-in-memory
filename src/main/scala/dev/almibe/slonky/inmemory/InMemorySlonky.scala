@@ -14,9 +14,7 @@ final class InMemorySlonky extends Slonky {
     IO { session.close() }
   }
 
-  def session(): Resource[IO, SlonkyInstance] = {
+  override def instance: Resource[IO, SlonkyInstance] = {
     Resource.make(acquire)(release)
   }
-
-  override def instance: Resource[IO, SlonkyInstance] = ???
 }
