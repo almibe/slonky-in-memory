@@ -10,8 +10,8 @@ import scodec.bits.ByteVector
 import scala.collection.SortedMap
 
 object SharedLookup {
-  def keyExists(data: SortedMap[ByteVector, ByteVector], key: ByteVector): IO[Boolean] = {
-    ???
+  def keyExists(data: SortedMap[ByteVector, ByteVector], key: ByteVector): IO[Boolean] = IO {
+    data.contains(key)
   }
 
   def prefixExists(data: SortedMap[ByteVector, ByteVector], prefix: ByteVector): IO[Boolean] = IO {
@@ -23,7 +23,7 @@ object SharedLookup {
     }
   }
 
-  def get(data: SortedMap[ByteVector, ByteVector], key: ByteVector): IO[Option[ByteVector]] = {
-    ???
+  def get(data: SortedMap[ByteVector, ByteVector], key: ByteVector): IO[Option[ByteVector]] = IO {
+    data.get(key)
   }
 }
