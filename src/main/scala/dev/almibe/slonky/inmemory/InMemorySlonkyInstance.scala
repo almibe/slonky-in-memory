@@ -5,11 +5,9 @@
 package dev.almibe.slonky.inmemory
 
 import java.util.concurrent.atomic.AtomicReference
-
 import cats.effect.{IO, Resource}
 import dev.almibe.slonky.{SlonkyInstance, SlonkyReadTx, SlonkyWriteTx}
 import scodec.bits.ByteVector
-
 import scala.collection.immutable.{SortedMap, TreeMap}
 
 private final class InMemorySlonkyInstance extends SlonkyInstance {

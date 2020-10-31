@@ -5,11 +5,9 @@
 package dev.almibe.slonky.inmemory
 
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
-
 import cats.effect.IO
 import dev.almibe.slonky.SlonkyWriteTx
 import scodec.bits.ByteVector
-
 import scala.collection.immutable.SortedMap
 
 private final class InMemoryWriteTx(private val data: AtomicReference[SortedMap[ByteVector, ByteVector]]) extends SlonkyWriteTx {

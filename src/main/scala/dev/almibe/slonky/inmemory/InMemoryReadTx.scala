@@ -8,7 +8,6 @@ import cats.effect.IO
 import dev.almibe.slonky.SlonkyReadTx
 import scodec.bits.ByteVector
 import fs2.Stream
-
 import scala.collection.immutable.SortedMap
 
 private final class InMemoryReadTx(private val data: SortedMap[ByteVector, ByteVector]) extends SlonkyReadTx {
@@ -18,18 +17,18 @@ private final class InMemoryReadTx(private val data: SortedMap[ByteVector, ByteV
 
   override def get(key: ByteVector): IO[Option[ByteVector]] = SharedLookup.get(data, key)
 
-  override def prefixScan(prefix: ByteVector): Stream[IO, (ByteVector, ByteVector)] = {
-    val range = data.rangeFrom(prefix)
-    if (range.isEmpty) {
-      Stream.empty
-    } else {
-      Stream.fromIterator[IO](range.filter { x => x._1.startsWith(prefix) }.iterator)
+  override def prefixScan(prefix: ByteVector): Stream[IO, (ByteVector, ByteVector)] =
+    Stream.fromIterator[IO] {
+      val range = data.rangeFrom(prefix)
+      if (range.isEmpty) {
+        Iterator.empty
+      } else {
+        range.takeWhile { x => x._1.startsWith(prefix) }.iterator
+      }
     }
-  }
 
-  override def rangeScan(from: ByteVector, to: ByteVector): Stream[IO, (ByteVector, ByteVector)] = {
+  override def rangeScan(from: ByteVector, to: ByteVector): Stream[IO, (ByteVector, ByteVector)] =
     Stream.fromIterator[IO](data.range(from, to).iterator)
-  }
 
   override def scanAll(): Stream[IO, (ByteVector, ByteVector)] = Stream.fromIterator[IO](data.iterator)
 

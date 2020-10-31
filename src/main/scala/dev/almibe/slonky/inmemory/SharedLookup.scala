@@ -6,7 +6,6 @@ package dev.almibe.slonky.inmemory
 
 import cats.effect.IO
 import scodec.bits.ByteVector
-
 import scala.collection.SortedMap
 
 object SharedLookup {
