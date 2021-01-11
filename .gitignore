@@ -1,3 +1,8 @@
-target/
+/target
+Cargo.lock
 .idea
-_site
+.vscode
+
+#old scala ignores
+/project/
+.metals
